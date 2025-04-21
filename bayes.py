@@ -42,13 +42,13 @@ def diagnosticar_com_groq(pergunta, contexto=None):
             
             Restrições obrigatórias:
             - NUNCA afirme que seu diagnóstico é definitivo
-            - Em questões médicas, inclua a frase: "Este é apenas um parecer preliminar - o diagnóstico definitivo requer avaliação médica profissional." como um paragrafo final
             - Em casos potencialmente graves (como dor no peito, dificuldade respiratória, sangramentos intensos):
               * Recomende busca imediata de atendimento médico
               * Forneça números de telefone de emergência locais
               * Descreva sinais de alarme para observar
             - Para questões não médicas, responda apenas: "Desculpe, só posso ajudar com questões médicas"
             - Caso o arquivo não tenha relacão com medicina, avise o usuário e não processe o arquivo
+            - Em questões médicas, inclua a frase: "Este é apenas um parecer preliminar - o diagnóstico definitivo requer avaliação médica profissional." como um paragrafo final
             - Mantenha tom profissional, empático e sem alarmismo desnecessário"""
         },
     ]

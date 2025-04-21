@@ -25,8 +25,7 @@ def set_meta_tags():
             <!-- WhatsApp Specific -->
             <meta property="og:title" content="DiagnosticAI - Assistente Médico">
             <meta property="og:description" content="Análise médica preliminar com IA especializada">
-            <meta property="og:image" content="https://i.imgur.com/SUBMIT_YOUR_LOGO_URL_HERE.jpg">
-            <meta property="og:url" content="https://your-app.streamlit.app">
+            <meta property="og:url" content="https://diagnostico-online.streamlit.app">
             <meta property="og:type" content="website">
             <meta property="og:image:width" content="1200">
             <meta property="og:image:height" content="630">

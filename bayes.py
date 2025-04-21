@@ -2,6 +2,7 @@ import streamlit as st
 import fitz  # PyMuPDF
 from groq import Groq
 import os
+import base64
 
 # Caminho dinâmico da logo
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -10,6 +11,31 @@ LOGO_PATH = os.path.join(CURRENT_DIR, "logo.png")
 # Configurar chave da Groq
 GROQ_API_KEY = "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"
 client = Groq(api_key=GROQ_API_KEY)
+
+# Função para converter imagem local para base64 (para preview)
+def get_image_base64(path):
+    with open(path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode()
+
+# Configuração das meta tags para preview ao compartilhar
+def set_meta_tags():
+    logo_base64 = get_image_base64(LOGO_PATH)
+    st.markdown(
+        f"""
+        <head>
+            <meta property="og:title" content="DiagnosticAI - Assistente Médico Inteligente">
+            <meta property="og:description" content="Obtenha análises médicas preliminares com IA baseada em evidências científicas">
+            <meta property="og:image" content="data:image/png;base64,{logo_base64}">
+            <meta property="og:url" content="https://diagnostico-online.streamlit.app/">
+            <meta property="og:type" content="website">
+            <meta name="twitter:card" content="summary_large_image">
+            <meta name="twitter:title" content="DiagnosticAI">
+            <meta name="twitter:description" content="Assistente Médico com IA">
+            <meta name="twitter:image" content="data:image/png;base64,{logo_base64}">
+        </head>
+        """,
+        unsafe_allow_html=True
+    )
 
 # Função para extrair texto de PDFs
 def extract_text_from_pdfs(uploaded_pdfs):
@@ -23,7 +49,6 @@ def extract_text_from_pdfs(uploaded_pdfs):
         except Exception as e:
             st.error(f"❌ Erro ao ler o PDF '{pdf.name}': {e}")
     return text
-
 
 # Função para interagir com a IA da Groq para diagnósticos
 def diagnosticar_com_groq(pergunta, contexto=None):
@@ -59,7 +84,7 @@ def diagnosticar_com_groq(pergunta, contexto=None):
         messages.append({"role": "user", "content": pergunta})
     
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="llama3-70b-8192",
         messages=messages
     )
     return response.choices[0].message.content
@@ -73,6 +98,9 @@ def main():
         layout="centered"
     )
     
+    # Configurar meta tags para compartilhamento
+    set_meta_tags()
+
     # Imagem da logo (com largura responsiva)
     st.image(LOGO_PATH, use_container_width=True)
 

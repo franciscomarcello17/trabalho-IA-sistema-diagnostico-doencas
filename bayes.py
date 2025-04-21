@@ -19,24 +19,21 @@ def get_image_base64(path):
 
 # Configuração das meta tags para preview ao compartilhar
 def set_meta_tags():
-    logo_base64 = get_image_base64(LOGO_PATH)
     st.markdown(
-        f"""
+        """
         <head>
-            <meta property="og:title" content="DiagnosticAI - Assistente Médico Inteligente">
-            <meta property="og:description" content="Obtenha análises médicas preliminares com IA baseada em evidências científicas">
-            <meta property="og:image" content="data:image/png;base64,{logo_base64}">
-            <meta property="og:url" content="https://diagnostico-online.streamlit.app/">
+            <!-- WhatsApp Specific -->
+            <meta property="og:title" content="DiagnosticAI - Assistente Médico">
+            <meta property="og:description" content="Análise médica preliminar com IA especializada">
+            <meta property="og:image" content="https://i.imgur.com/SUBMIT_YOUR_LOGO_URL_HERE.jpg">
+            <meta property="og:url" content="https://your-app.streamlit.app">
             <meta property="og:type" content="website">
-            <meta name="twitter:card" content="summary_large_image">
-            <meta name="twitter:title" content="DiagnosticAI">
-            <meta name="twitter:description" content="Assistente Médico com IA">
-            <meta name="twitter:image" content="data:image/png;base64,{logo_base64}">
+            <meta property="og:image:width" content="1200">
+            <meta property="og:image:height" content="630">
         </head>
         """,
         unsafe_allow_html=True
     )
-
 # Função para extrair texto de PDFs
 def extract_text_from_pdfs(uploaded_pdfs):
     text = ""
@@ -72,7 +69,7 @@ def diagnosticar_com_groq(pergunta, contexto=None):
               * Forneça números de telefone de emergência locais
               * Descreva sinais de alarme para observar
             - Para questões não médicas, responda apenas: "Desculpe, só posso ajudar com questões médicas"
-            - Caso o arquivo não tenha relacão com medicina, não fale sobre as informacoes do arquivo, apenas diga que não pode ajudar
+            - Caso o arquivo não tenha relacão com medicina, avise o usuário e não processe o arquivo
             - Em questões médicas, inclua a frase: "Este é apenas um parecer preliminar - o diagnóstico definitivo requer avaliação médica profissional." como um paragrafo final
             - Mantenha tom profissional, empático e sem alarmismo desnecessário"""
         },

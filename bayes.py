@@ -21,13 +21,19 @@ def extract_text_from_pdfs(uploaded_pdfs):
     return text
 
 # Função para interagir com a IA da Groq para diagnósticos
-def diagnosticar_com_groq(pergunta, contexto):
+def diagnosticar_com_groq(pergunta, contexto=None):
+    messages = [
+        {"role": "system", "content": "Você é uma inteligência artificial médica. Com base em relatórios clínicos e exames enviados pelo usuário em PDF (quando disponíveis), forneça informações médicas. Seja claro, mas alerte sempre ao final, usando uma frase padrão que o diagnóstico definitivo depende de avaliação médica profissional. Em casos aparentam ser mais extremos recomende que o usuário busque atendimento médico imediato e forneca contatos de emergencia."}
+    ]
+    
+    if contexto:
+        messages.append({"role": "user", "content": f"Contexto dos exames:\n{contexto}\n\nPergunta: {pergunta}"})
+    else:
+        messages.append({"role": "user", "content": pergunta})
+    
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        messages=[
-            {"role": "system", "content": "Você é uma inteligência artificial médica. Com base em relatórios clínicos e exames enviados pelo usuário em PDF, forneça diagnósticos preliminares ou hipóteses médicas. Seja claro, mas alerte sempre ao final, usando uma frase padrão que o diagnóstico definitivo depende de avaliação médica profissional. Em casos aparentam ser mais extremos recomende que o usuário busque atendimento médico imediato e forneca contatos de emergencia."},
-            {"role": "user", "content": f"{contexto}\n\nPergunta: {pergunta}"}
-        ]
+        messages=messages
     )
     return response.choices[0].message.content
 
@@ -36,31 +42,17 @@ def main():
     # Configuração da página com ícone personalizado
     st.set_page_config(
         page_title="DiagnosticAI",
-        page_icon="⚕️",  # Altere para um emoji ou caminho de imagem
+        page_icon="⚕️",
         layout="centered"
     )
     
     # Imagem da logo (com largura responsiva)
     st.image(LOGO_PATH, use_container_width=True)
 
-    # # Título centralizado com CSS
-    # st.markdown(
-    #     """
-    #     <style>
-    #         .centered-title {
-    #             text-align: center;
-    #             font-size: 2.5rem !important;
-    #             margin-bottom: 20px;
-    #         }
-    #     </style>
-    #     <h1 class="centered-title">⚕️ DiagnosticAI</h1>
-    #     """,
-    #     unsafe_allow_html=True
-    # )
-    st.markdown("Carregue relatórios médicos ou exames em PDF e faça perguntas para obter um **diagnóstico preliminar automatizado**.")
+    st.markdown("Faça perguntas médicas para obter informações. Você pode carregar relatórios médicos ou exames em PDF para um diagnóstico mais preciso.")
 
     with st.sidebar:
-        st.header("📄 Upload de Arquivos")
+        st.header("📄 Upload de Arquivos (Opcional)")
         uploaded_pdfs = st.file_uploader("Adicione seus PDFs clínicos", type="pdf", accept_multiple_files=True)
 
     if uploaded_pdfs:
@@ -70,8 +62,9 @@ def main():
 
     pergunta_usuario = st.text_input("🩺 Qual é a sua dúvida médica?")
 
-    if pergunta_usuario and "texto_clinico" in st.session_state:
-        resposta = diagnosticar_com_groq(pergunta_usuario, st.session_state["texto_clinico"])
+    if pergunta_usuario:
+        contexto = st.session_state.get("texto_clinico", None)
+        resposta = diagnosticar_com_groq(pergunta_usuario, contexto)
         st.markdown("### 🧾 Resposta da IA:")
         st.write(resposta)
 

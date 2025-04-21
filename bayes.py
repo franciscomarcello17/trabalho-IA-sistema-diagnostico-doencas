@@ -25,7 +25,7 @@ def diagnosticar_com_groq(pergunta, contexto):
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
-            {"role": "system", "content": "Você é uma inteligência artificial médica. Com base em relatórios clínicos e exames enviados pelo usuário em PDF, forneça diagnósticos preliminares ou hipóteses médicas. Seja claro, mas alerte que o diagnóstico definitivo depende de avaliação médica profissional."},
+            {"role": "system", "content": "Você é uma inteligência artificial médica. Com base em relatórios clínicos e exames enviados pelo usuário em PDF, forneça diagnósticos preliminares ou hipóteses médicas. Seja claro, mas alerte sempre ao final, usando uma frase padrão que o diagnóstico definitivo depende de avaliação médica profissional. Em casos aparentam ser mais extremos recomende que o usuário busque atendimento médico imediato e forneca contatos de emergencia."},
             {"role": "user", "content": f"{contexto}\n\nPergunta: {pergunta}"}
         ]
     )
@@ -33,10 +33,9 @@ def diagnosticar_com_groq(pergunta, contexto):
 
 # Interface do Streamlit
 def main():
-    st.set_page_config(page_title="DiagnosticAI", layout="centered")
-    st.image(LOGO_PATH, width=200, caption="Sua saúde potencializada pela Inteligência Artificial")
+    st.set_page_config(page_title="⚕️ DiagnosticAI", layout="centered")
 
-    st.title("💬 Diagnóstico Inteligente com IA")
+    st.title("⚕️ DiagnosticAI")
     st.markdown("Carregue relatórios médicos ou exames em PDF e faça perguntas para obter um **diagnóstico preliminar automatizado**.")
 
     with st.sidebar:

@@ -17,22 +17,22 @@ def get_image_base64(path):
     with open(path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode()
 
-# Configuração das meta tags para preview ao compartilhar
-def set_meta_tags():
-    st.markdown(
-        """
-        <head>
-            <!-- WhatsApp Specific -->
-            <meta property="og:title" content="DiagnosticAI - Assistente Médico">
-            <meta property="og:description" content="Análise médica preliminar com IA especializada">
-            <meta property="og:url" content="https://diagnostico-online.streamlit.app">
-            <meta property="og:type" content="website">
-            <meta property="og:image:width" content="1200">
-            <meta property="og:image:height" content="630">
-        </head>
-        """,
-        unsafe_allow_html=True
-    )
+# # Configuração das meta tags para preview ao compartilhar
+# def set_meta_tags():
+#     st.markdown(
+#         """
+#         <head>
+#             <meta property="og:title" content="DiagnosticAI - Assistente Médico">
+#             <meta property="og:description" content="Análise médica preliminar com IA especializada">
+#             <meta property="og:url" content="https://diagnostico-online.streamlit.app">
+#             <meta property="og:type" content="website">
+#             <meta property="og:image:width" content="1200">
+#             <meta property="og:image:height" content="630">
+#         </head>
+#         """,
+#         unsafe_allow_html=True
+#     )
+
 # Função para extrair texto de PDFs
 def extract_text_from_pdfs(uploaded_pdfs):
     text = ""
@@ -95,7 +95,7 @@ def main():
     )
     
     # Configurar meta tags para compartilhamento
-    set_meta_tags()
+    # set_meta_tags()
 
     # Imagem da logo (com largura responsiva)
     st.image(LOGO_PATH, use_container_width=True)

@@ -46,7 +46,8 @@ O **DiagnosticAI** é uma ferramenta de suporte médico que utiliza inteligênci
 
 ## 🌐 Demo Online
 Acesse nossa versão em produção:  
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://diagnostico-online.streamlit.app/)
-
+<a href="https://diagnostico-online.streamlit.app/" target="_blank">
+  <img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Streamlit App">
+</a>
 ## 📝 Licença
 Este projeto está licenciado sob a **MIT License** - veja o arquivo [LICENSE](LICENSE) para detalhes.

@@ -34,7 +34,8 @@ def diagnosticar_com_groq(pergunta, contexto):
 # Interface do Streamlit
 def main():
     st.set_page_config(page_title="⚕️ DiagnosticAI", layout="centered")
-    st.image(LOGO_PATH, width=300, layout="centered")
+    st.image(LOGO_PATH, width=300)
+
 
     st.title("⚕️ DiagnosticAI")
     st.markdown("Carregue relatórios médicos ou exames em PDF e faça perguntas para obter um **diagnóstico preliminar automatizado**.")

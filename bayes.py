@@ -35,7 +35,7 @@ def diagnosticar_com_groq(pergunta, contexto):
 def main():
     # Configuração da página com ícone personalizado
     st.set_page_config(
-        page_title="⚕️ DiagnosticAI",
+        page_title="DiagnosticAI",
         page_icon="⚕️",  # Altere para um emoji ou caminho de imagem
         layout="centered"
     )
@@ -43,20 +43,20 @@ def main():
     # Imagem da logo (com largura responsiva)
     st.image(LOGO_PATH, use_container_width=True)
 
-    # Título centralizado com CSS
-    st.markdown(
-        """
-        <style>
-            .centered-title {
-                text-align: center;
-                font-size: 2.5rem !important;
-                margin-bottom: 20px;
-            }
-        </style>
-        <h1 class="centered-title">⚕️ DiagnosticAI</h1>
-        """,
-        unsafe_allow_html=True
-    )
+    # # Título centralizado com CSS
+    # st.markdown(
+    #     """
+    #     <style>
+    #         .centered-title {
+    #             text-align: center;
+    #             font-size: 2.5rem !important;
+    #             margin-bottom: 20px;
+    #         }
+    #     </style>
+    #     <h1 class="centered-title">⚕️ DiagnosticAI</h1>
+    #     """,
+    #     unsafe_allow_html=True
+    # )
     st.markdown("Carregue relatórios médicos ou exames em PDF e faça perguntas para obter um **diagnóstico preliminar automatizado**.")
 
     with st.sidebar:

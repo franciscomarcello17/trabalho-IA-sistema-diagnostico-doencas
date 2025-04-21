@@ -72,7 +72,7 @@ def diagnosticar_com_groq(pergunta, contexto=None):
               * Forneça números de telefone de emergência locais
               * Descreva sinais de alarme para observar
             - Para questões não médicas, responda apenas: "Desculpe, só posso ajudar com questões médicas"
-            - Caso o arquivo não tenha relacão com medicina, avise o usuário e não fale sobre as informacoes do arquivo
+            - Caso o arquivo não tenha relacão com medicina, não fale sobre as informacoes do arquivo, apenas diga que não pode ajudar
             - Em questões médicas, inclua a frase: "Este é apenas um parecer preliminar - o diagnóstico definitivo requer avaliação médica profissional." como um paragrafo final
             - Mantenha tom profissional, empático e sem alarmismo desnecessário"""
         },

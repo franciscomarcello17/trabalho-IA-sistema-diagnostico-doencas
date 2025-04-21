@@ -28,7 +28,7 @@ def extract_text_from_pdfs(uploaded_pdfs):
 # Função para interagir com a IA da Groq para diagnósticos
 def diagnosticar_com_groq(pergunta, contexto=None):
     messages = [
-        {"role": "system", "content": "Você é uma inteligência artificial médica. Com base em relatórios clínicos e exames enviados pelo usuário em PDF (quando disponíveis), forneça informações médicas. Seja claro, mas alerte sempre ao final, usando uma frase padrão que o diagnóstico definitivo depende de avaliação médica profissional. Em casos aparentam ser mais extremos recomende que o usuário busque atendimento médico imediato e forneca contatos de emergencia. Caso a pergunta não tenha relação com medicina, informe apenas que não pode ajudar."},
+        {"role": "system", "content": "Você é uma inteligência artificial médica. Com base em relatórios clínicos e exames enviados pelo usuário em PDF (quando disponíveis), forneça informações médicas. Seja claro, mas alerte sempre ao final, usando uma frase padrão que o diagnóstico definitivo depende de avaliação médica profissional. Em casos aparentam ser mais extremos recomende que o usuário busque atendimento médico imediato e forneca contatos de emergencia. Caso a pergunta não tenha relação com medicina, informe apenas que não pode ajudar, sem responder a pergunta em questão."},
     ]
     
     if contexto:

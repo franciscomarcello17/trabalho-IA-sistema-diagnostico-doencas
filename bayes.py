@@ -2,10 +2,6 @@ import streamlit as st
 import fitz  # PyMuPDF
 from groq import Groq
 import os
-import requests
-from geopy.geocoders import Nominatim
-import folium
-from streamlit_folium import folium_static
 
 # Caminho dinâmico da logo
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -94,6 +90,7 @@ GLOSSARIO = {
     "ICC": "Insuficiência Cardíaca Congestiva - incapacidade do coração bombear sangue.",
     "HAS": "Hipertensão Arterial Sistêmica."
 }
+
 # Números de emergência por país
 EMERGENCY_NUMBERS = {
     "Brasil": {
@@ -153,6 +150,7 @@ EMERGENCY_NUMBERS = {
         "Emergência Internacional": "112 (funciona em muitos países)"
     }
 }
+
 # Função para extrair texto de PDFs
 def extract_text_from_pdfs(uploaded_pdfs):
     text = ""
@@ -190,43 +188,6 @@ def mostrar_numeros_emergencia():
     
     for servico, numero in EMERGENCY_NUMBERS[pais_selecionado].items():
         st.sidebar.markdown(f"**{servico}:** `{numero}`")
-
-# Função para criar mapa de hospitais próximos
-def criar_mapa_hospitais(localizacao_usuario):
-    try:
-        geolocator = Nominatim(user_agent="diagnostic_ai")
-        location = geolocator.geocode(localizacao_usuario)
-        
-        if location:
-            mapa = folium.Map(location=[location.latitude, location.longitude], zoom_start=13)
-            
-            # Adicionar marcador do usuário
-            folium.Marker(
-                [location.latitude, location.longitude],
-                popup="Sua localização",
-                icon=folium.Icon(color="blue")
-            ).add_to(mapa)
-            
-            # Buscar hospitais próximos (usando Nominatim - para produção, considere API especializada)
-            hospitais = geolocator.geocode("hospital", exactly_one=False, limit=5, 
-                                          viewbox=[[location.latitude-0.1, location.longitude-0.1], 
-                                                  [location.latitude+0.1, location.longitude+0.1]])
-            
-            if hospitais:
-                for hospital in hospitais:
-                    folium.Marker(
-                        [hospital.latitude, hospital.longitude],
-                        popup=hospital.address,
-                        icon=folium.Icon(color="red", icon="plus-sign")
-                    ).add_to(mapa)
-            
-            return mapa
-        else:
-            st.warning("Não foi possível determinar sua localização. Verifique o endereço.")
-            return None
-    except Exception as e:
-        st.error(f"Erro ao criar mapa: {e}")
-        return None
 
 # Função para adicionar tooltips com glossário
 def adicionar_glossario(texto):
@@ -323,13 +284,6 @@ def main():
         uploaded_pdfs = st.file_uploader("Adicione seus PDFs clínicos", type="pdf", accept_multiple_files=True)
         
         mostrar_numeros_emergencia()
-        
-        st.header("🏥 Localização para Hospitais")
-        localizacao_usuario = st.text_input("Digite seu endereço ou cidade para encontrar hospitais próximos:")
-        if localizacao_usuario:
-            mapa = criar_mapa_hospitais(localizacao_usuario)
-            if mapa:
-                folium_static(mapa)
 
     if uploaded_pdfs:
         texto_extraido = extract_text_from_pdfs(uploaded_pdfs)
@@ -345,7 +299,7 @@ def main():
         nivel_triagem = determinar_triagem(resposta)
         
         # Mostrar resposta com formatação de cores
-        st.markdown("### � Triagem de Urgência")
+        st.markdown("### ⚠️ Triagem de Urgência")
         if nivel_triagem == "vermelho":
             st.error("🔴 Nível VERMELHO - Procure atendimento médico IMEDIATAMENTE!")
         elif nivel_triagem == "amarelo":
@@ -353,21 +307,11 @@ def main():
         else:
             st.success("🟢 Nível VERDE - Sem urgência aparente")
         
-        st.markdown("### � Resposta da IA:")
+        st.markdown("### 💡 Resposta da IA:")
         
         # Adicionar tooltips do glossário
         resposta_com_glossario = adicionar_glossario(resposta)
         st.markdown(resposta_com_glossario, unsafe_allow_html=True)
-        
-        # Mostrar mapa novamente se for caso de emergência
-        if nivel_triagem in ["vermelho", "amarelo"]:
-            st.markdown("### 🏥 Hospitais Próximos")
-            if 'localizacao_usuario' in locals() and localizacao_usuario:
-                mapa = criar_mapa_hospitais(localizacao_usuario)
-                if mapa:
-                    folium_static(mapa)
-            else:
-                st.warning("Digite sua localização na barra lateral para visualizar hospitais próximos.")
 
 if __name__ == "__main__":
     main()

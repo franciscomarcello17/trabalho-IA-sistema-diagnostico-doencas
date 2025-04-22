@@ -11,86 +11,147 @@ LOGO_PATH = os.path.join(CURRENT_DIR, "logo.png")
 GROQ_API_KEY = "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"
 client = Groq(api_key=GROQ_API_KEY)
 
-# Glossário médico (mantido igual ao anterior)
+# Glossário médico
 GLOSSARIO = {
-    # ... (o mesmo glossário que você já tinha)
+    # Termos gerais
+    "hipertensão": "Pressão arterial elevada, geralmente acima de 140/90 mmHg.",
+    "diabetes": "Doença metabólica caracterizada por altos níveis de glicose no sangue.",
+    "hiperglicemia": "Nível elevado de glicose no sangue (>126 mg/dL em jejum).",
+    "hipoglicemia": "Nível baixo de glicose no sangue (<70 mg/dL).",
+    
+    # Exames e procedimentos
+    "ECG": "Eletrocardiograma - exame que registra a atividade elétrica do coração.",
+    "EEG": "Eletroencefalograma - exame que avalia a atividade elétrica cerebral.",
+    "endoscopia": "Exame que visualiza o trato digestivo alto usando uma câmera.",
+    "colonoscopia": "Exame que visualiza o intestino grosso usando uma câmera.",
+    
+    # Componentes sanguíneos
+    "hemoglobina": "Proteína nas hemácias que transporta oxigênio (valores normais: 13-18 g/dL homens, 12-16 g/dL mulheres).",
+    "leucócitos": "Células brancas do sangue (valores normais: 4.000-11.000/mm³).",
+    "plaquetas": "Fragmentos celulares para coagulação (valores normais: 150.000-450.000/mm³).",
+    "hematócrito": "Porcentagem de células vermelhas no sangue (valores normais: 40-54% homens, 36-48% mulheres).",
+    
+    # Marcadores bioquímicos
+    "PCR": "Proteína C-Reativa - marcador de inflamação (normal <5 mg/L).",
+    "TSH": "Hormônio estimulante da tireoide (normal 0,4-4,5 mUI/L).",
+    "T4 livre": "Tiroxina livre - hormônio tireoidiano (normal 0,8-1,8 ng/dL).",
+    "AST/ALT": "Enzimas hepáticas (normal AST <40 U/L, ALT <56 U/L).",
+    
+    # Função renal
+    "creatinina": "Marcador de função renal (normal 0,6-1,3 mg/dL).",
+    "ureia": "Produto do metabolismo proteico (normal 15-45 mg/dL).",
+    "clearance": "Taxa de filtração glomerular (normal >90 mL/min).",
+    
+    # Cardiovascular
+    "PA": "Pressão arterial (normal <120/80 mmHg).",
+    "FC": "Frequência cardíaca (normal 60-100 bpm em repouso).",
+    "taquicardia": "Frequência cardíaca >100 bpm.",
+    "bradicardia": "Frequência cardíaca <60 bpm.",
+    
+    # Respiratório
+    "FR": "Frequência respiratória (normal 12-20 rpm em adultos).",
+    "saturação O2": "Saturação de oxigênio (normal 95-100%).",
+    "dispneia": "Dificuldade respiratória.",
+    "SpO2": "Saturação periférica de oxigênio medida por oxímetro.",
+    
+    # Imagem
+    "Rx": "Radiografia (raio-X) - exame de imagem por radiação ionizante.",
+    "TC": "Tomografia computadorizada - imagens seccionais por raio-X.",
+    "RM": "Ressonância magnética - imagens por campo magnético e ondas de rádio.",
+    "US": "Ultrassonografia - imagens por ondas ultrassônicas.",
+    
+    # Medicamentos
+    "AAS": "Ácido acetilsalicílico (aspirina) - antiagregante plaquetário.",
+    "IBP": "Inibidor de bomba de prótons (omeprazol, pantoprazol).",
+    "AINE": "Anti-inflamatório não esteroidal (ibuprofeno, diclofenaco).",
+    "betabloqueador": "Classe de medicamentos para hipertensão e arritmias.",
+    
+    # Especialidades
+    "cardiologia": "Especialidade médica que trata do coração e sistema cardiovascular.",
+    "neurologia": "Especialidade que trata do sistema nervoso.",
+    "ortopedia": "Especialidade que trata do sistema musculoesquelético.",
+    "pediatria": "Especialidade médica dedicada a crianças.",
+    
+    # Emergências
+    "AVC": "Acidente Vascular Cerebral - interrupção do fluxo sanguíneo cerebral.",
+    "IAM": "Infarto Agudo do Miocárdio (ataque cardíaco).",
+    "PCR": "Parada Cardiorrespiratória - cessação da função cardíaca e respiratória.",
+    "TEP": "Tromboembolismo Pulmonar - obstrução da artéria pulmonar.",
+    
+    # Sinais e sintomas
+    "cefaleia": "Dor de cabeça.",
+    "mialgia": "Dor muscular.",
+    "artralgia": "Dor articular.",
+    "parestesia": "Formigamento ou dormência.",
+    
+    # Doenças
+    "DPOC": "Doença Pulmonar Obstrutiva Crônica (enfisema e bronquite crônica).",
+    "IR": "Insuficiência Renal - perda da função dos rins.",
+    "ICC": "Insuficiência Cardíaca Congestiva - incapacidade do coração bombear sangue.",
+    "HAS": "Hipertensão Arterial Sistêmica."
 }
 
-# Números de emergência por país (atualizado com textos em cada língua)
+# Números de emergência por país
 EMERGENCY_NUMBERS = {
-    "🇧🇷 Brasil": {
-        "SAMU (Serviço de Atendimento Móvel de Urgência)": "192",
+    "Brasil": {
+        "SAMU": "192",
         "Bombeiros": "193", 
         "Polícia Militar": "190",
-        "Disque Intoxicação (Anvisa)": "0800-722-6001",
+        "Disque Intoxicação": "0800-722-6001",
         "Centro de Valorização da Vida (CVV)": "188"
     },
-    "🇵🇹 Portugal": {
-        "Número Europeu de Emergência": "112",
+    "Portugal": {
+        "Emergência": "112",
         "Saúde 24": "808 24 24 24",
-        "Centro de Informação Antivenenos": "808 250 143",
-        "Polícia de Segurança Pública": "21 342 22 22"
+        "Intoxicações": "808 250 143"
     },
-    "🇺🇸 EUA": {
-        "Emergency Services": "911",
-        "Poison Control Center": "1-800-222-1222",
-        "Suicide & Crisis Lifeline": "988",
-        "Non-Emergency Police": "311"
+    "EUA": {
+        "Emergência": "911",
+        "Poison Control": "1-800-222-1222",
+        "Suicide Prevention": "988"
     },
-    "🇪🇸 Espanha": {
-        "Emergencias": "112",
-        "Información Toxicológica": "915 620 420",
-        "Policía Nacional": "091",
-        "Bomberos": "080"
+    "Espanha": {
+        "Emergência": "112",
+        "Toxicologia": "915 620 420"
     },
-    "🇬🇧 Reino Unido": {
-        "Emergency Services": "999",
-        "NHS Non-emergency": "111",
-        "National Poison Information": "0344 892 0111",
-        "Police Non-emergency": "101"
+    "Reino Unido": {
+        "Emergência": "999",
+        "NHS Direct": "111",
+        "Poison Information": "0344 892 0111"
     },
-    "🇩🇪 Alemanha": {
-        "Notruf": "112",
-        "Giftnotruf": "030-19240",
-        "Polizei Notruf": "110",
-        "Ärztlicher Bereitschaftsdienst": "116 117"
+    "Alemanha": {
+        "Emergência": "112",
+        "Intoxicações": "030-19240"
     },
-    "🇫🇷 França": {
-        "Urgences Médicales (SAMU)": "15",
-        "Police Secours": "17",
-        "Pompiers": "18",
+    "França": {
+        "Emergência": "112",
+        "SAMU": "15",
         "Centre Anti-Poison": "01 40 05 48 48"
     },
-    "🇮🇹 Itália": {
-        "Emergenza": "112",
-        "Emergenza Sanitaria": "118",
-        "Centro Antiveleni": "06 4997 7700",
-        "Carabinieri": "112"
+    "Itália": {
+        "Emergência": "112",
+        "Emergência Médica": "118",
+        "Centro Antiveleni": "06 4997 7700"
     },
-    "🇯🇵 Japão": {
-        "救急車 (Ambulância)": "119",
-        "警察 (Polícia)": "110",
-        "中毒110番 (Centro de Envenenamento)": "03-3812-7111"
+    "Japão": {
+        "Emergência": "119",
+        "Polícia": "110"
     },
-    "🇦🇺 Austrália": {
-        "Emergency": "000",
-        "Poisons Information": "13 11 26",
-        "Police Assistance": "131 444",
-        "Suicide Call Back Service": "1300 659 467"
+    "Austrália": {
+        "Emergência": "000",
+        "Poisons Information": "13 11 26"
     },
-    "🇨🇦 Canadá": {
-        "Emergency Services": "911",
-        "Poison Control": "1-800-268-9017",
-        "Suicide Prevention": "1-833-456-4566",
-        "Non-emergency Police": "311"
+    "Canadá": {
+        "Emergência": "911",
+        "Poison Control": "1-800-268-9017"
     },
-    "🌍 Outro": {
-        "Emergência Internacional": "112 (funciona em muitos países)",
-        "Consulte": "o serviço de emergência local"
+    "Outro": {
+        "Consulte": "o serviço de emergência local",
+        "Emergência Internacional": "112 (funciona em muitos países)"
     }
 }
 
-# Função para extrair texto de PDFs (mantida igual)
+# Função para extrair texto de PDFs
 def extract_text_from_pdfs(uploaded_pdfs):
     text = ""
     for pdf in uploaded_pdfs:
@@ -103,7 +164,7 @@ def extract_text_from_pdfs(uploaded_pdfs):
             st.error(f"❌ Erro ao ler o PDF '{pdf.name}': {e}")
     return text
 
-# Função para determinar a cor da triagem (mantida igual)
+# Função para determinar a cor da triagem
 def determinar_triagem(resposta):
     termos_vermelho = ["emergência", "urgente", "imediatamente", "grave", "risco de vida", 
                       "SAMU", "192", "911", "112", "pronto-socorro", "dor no peito", 
@@ -120,14 +181,22 @@ def determinar_triagem(resposta):
     else:
         return "verde"
 
-# Função para adicionar tooltips com glossário (mantida igual)
+# Função para mostrar números de emergência
+def mostrar_numeros_emergencia():
+    st.sidebar.markdown("### 📞 Números de Emergência")
+    pais_selecionado = st.sidebar.selectbox("Selecione seu país:", list(EMERGENCY_NUMBERS.keys()))
+    
+    for servico, numero in EMERGENCY_NUMBERS[pais_selecionado].items():
+        st.sidebar.markdown(f"**{servico}:** `{numero}`")
+
+# Função para adicionar tooltips com glossário
 def adicionar_glossario(texto):
     for termo, definicao in GLOSSARIO.items():
         if termo.lower() in texto.lower():
             texto = texto.replace(termo, f'<span title="{definicao}">{termo}</span>')
     return texto
 
-# Função para interagir com a IA da Groq (mantida igual)
+# Função para interagir com a IA da Groq para diagnósticos
 def diagnosticar_com_groq(pergunta, contexto=None):
     messages = [
         {
@@ -166,179 +235,18 @@ def diagnosticar_com_groq(pergunta, contexto=None):
     )
     return response.choices[0].message.content
 
-# CSS para o botão de emergência e popup
-EMERGENCY_CSS = """
-<style>
-.emergency-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background-color: #ff4b4b;
-    color: white;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.emergency-button:hover {
-    background-color: #ff0000;
-    transform: scale(1.1);
-}
-
-.emergency-popup {
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 350px;
-    padding: 20px;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    z-index: 1001;
-    display: none;
-}
-
-.emergency-popup.show {
-    display: block;
-    animation: fadeIn 0.3s;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.emergency-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.emergency-item {
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-.emergency-flag {
-    font-size: 24px;
-    margin-right: 10px;
-}
-
-.country-selector {
-    margin-bottom: 15px;
-}
-
-.country-option {
-    display: inline-block;
-    margin: 5px;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 5px;
-}
-
-.country-option:hover {
-    background-color: #f0f0f0;
-}
-
-.country-option.selected {
-    background-color: #e0f7fa;
-    border: 1px solid #4dd0e1;
-}
-</style>
-"""
-
-# JavaScript para controlar o popup
-EMERGENCY_JS = """
-<script>
-function toggleEmergencyPopup() {
-    const popup = document.querySelector('.emergency-popup');
-    popup.classList.toggle('show');
-}
-
-function selectCountry(country) {
-    document.querySelectorAll('.country-option').forEach(opt => {
-        opt.classList.remove('selected');
-    });
-    event.currentTarget.classList.add('selected');
-    
-    document.querySelectorAll('.country-contacts').forEach(contacts => {
-        contacts.style.display = 'none';
-    });
-    document.getElementById(country + '-contacts').style.display = 'block';
-}
-</script>
-"""
-
-# Componente de emergência
-def emergency_component():
-    st.markdown(EMERGENCY_CSS, unsafe_allow_html=True)
-    st.markdown(EMERGENCY_JS, unsafe_allow_html=True)
-    
-    # Botão flutuante
-    st.markdown("""
-    <button class="emergency-button" onclick="toggleEmergencyPopup()">🚨</button>
-    <div class="emergency-popup">
-        <h3 style="margin-top: 0;">Contatos de Emergência</h3>
-        <div class="country-selector">
-    """, unsafe_allow_html=True)
-    
-    # Bandeiras/seletores de país
-    flags_html = ""
-    for i, country in enumerate(EMERGENCY_NUMBERS.keys()):
-        flags_html += f"""
-        <span class="country-option {'selected' if i==0 else ''}" onclick="selectCountry('country{i}')">
-            {country.split()[0]} <span style="font-size:12px">{' '.join(country.split()[1:])}</span>
-        </span>
-        """
-    st.markdown(flags_html, unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Contatos por país
-    for i, (country, numbers) in enumerate(EMERGENCY_NUMBERS.items()):
-        contacts_html = f"""
-        <div id="country{i}-contacts" class="country-contacts" style="{'display: block;' if i==0 else 'display: none;'}">
-            <div class="emergency-grid">
-        """
-        for service, number in numbers.items():
-            contacts_html += f"""
-            <div class="emergency-item">
-                <strong>{service}</strong><br>
-                <span style="font-size:16px; color: #ff4b4b;">{number}</span>
-            </div>
-            """
-        contacts_html += """
-            </div>
-        </div>
-        """
-        st.markdown(contacts_html, unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# Interface principal
+# Interface do Streamlit
 def main():
-    # Configuração da página
+    # Configuração da página com ícone personalizado
     st.set_page_config(
         page_title="DiagnosticAI",
         page_icon="⚕️",
         layout="centered"
     )
     
-    # Imagem da logo
-    st.image(LOGO_PATH, use_column_width=True)
+    # Imagem da logo (com largura responsiva)
+    st.image(LOGO_PATH, use_container_width=True)
 
-    # CSS para tooltips (mantido igual)
     st.markdown("""
     <style>
     .tooltip {
@@ -371,23 +279,18 @@ def main():
 
     st.markdown("Faça perguntas médicas para obter informações. Você pode carregar relatórios médicos ou exames em PDF para um diagnóstico mais preciso.")
 
-    # Upload de arquivos
     with st.sidebar:
         st.header("📄 Upload de Arquivos (Opcional)")
         uploaded_pdfs = st.file_uploader("Adicione seus PDFs clínicos", type="pdf", accept_multiple_files=True)
+        
+        mostrar_numeros_emergencia()
 
-    # Processar PDFs
     if uploaded_pdfs:
         texto_extraido = extract_text_from_pdfs(uploaded_pdfs)
         st.session_state["texto_clinico"] = texto_extraido
 
-    # Campo de pergunta
     pergunta_usuario = st.text_input("🩺 Qual é a sua dúvida médica?")
 
-    # Botão de emergência (sempre visível)
-    emergency_component()
-
-    # Processar pergunta
     if pergunta_usuario:
         contexto = st.session_state.get("texto_clinico", None)
         resposta = diagnosticar_com_groq(pergunta_usuario, contexto)

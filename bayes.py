@@ -65,60 +65,47 @@ def diagnosticar_com_groq(pergunta, contexto=None):
 
 # Interface do Streamlit
 def main():
-    # Configuração da página
-    st.set_page_config(
-        page_title="DiagnosticAI",
-        page_icon="⚕️",
-        layout="centered"
-    )
+    st.set_page_config(page_title="DiagnosticAI", page_icon="⚕️", layout="centered")
 
-    # Estilo customizado
+    # Estilo visual tipo ChatGPT com suas cores
     st.markdown("""
     <style>
-    .reportview-container {
+    body {
         background-color: #f5f7fa;
     }
     .main {
         background-color: white;
         border-radius: 12px;
         padding: 2rem;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .message {
+        margin: 1rem 0;
+        padding: 1rem;
+        border-radius: 12px;
+        line-height: 1.6;
+    }
+    .user-message {
+        background-color: #eef2f7;
+        border-left: 5px solid #3b82f6;
+    }
+    .ai-message {
+        background-color: #e8f0fe;
+        border-left: 5px solid #10b981;
     }
     .stTextInput>div>div>input, .stTextArea textarea {
-        background-color: #eef2f7;
+        background-color: #eef2f7 !important;
     }
-    .pergunta-container {
-        position: relative;
-    }
-    .enviar-btn {
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-        border: none;
+    .stButton>button {
         background-color: #3b82f6;
         color: white;
-        border-radius: 50%;
-        width: 38px;
-        height: 38px;
-        cursor: pointer;
-        font-size: 20px;
-    }
-    .enviar-btn:hover {
-        background-color: #2563eb;
-    }
-    .centered-title {
-        text-align: center;
+        border-radius: 8px;
         font-weight: 600;
-        font-size: 22px;
-        margin-top: 1.5rem;
-        margin-bottom: 0.5rem;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # Logo
-    with st.container():
-        st.image(LOGO_PATH, use_container_width=True)
+    # Logo e título
+    st.image(LOGO_PATH, use_container_width=True)
 
     # Upload na barra lateral
     with st.sidebar:
@@ -132,24 +119,25 @@ def main():
         with st.expander("📄 Visualizar texto clínico extraído"):
             st.text(texto_extraido)
 
-    # Título centralizado
-    st.markdown('<div class="centered-title">🩺 Digite sua dúvida médica</div>', unsafe_allow_html=True)
+    # Campo para a pergunta médica
+    st.markdown("### 🩺 Digite sua dúvida médica")
+    pergunta_usuario = st.text_area("Qual é sua pergunta?", height=100)
 
-    # Input com botão dentro
-    with st.form("form_pergunta", clear_on_submit=True):
-        st.markdown('<div class="pergunta-container">', unsafe_allow_html=True)
-        pergunta_usuario = st.text_area("", height=100, placeholder="Digite sua pergunta aqui...")
-        st.markdown('<button class="enviar-btn" type="submit">↑</button>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        submitted = st.form_submit_button("Enviar", type="primary")
-
-    if submitted and pergunta_usuario.strip():
+    if st.button("Enviar Pergunta"):
         contexto = st.session_state.get("texto_clinico", None)
         resposta = diagnosticar_com_groq(pergunta_usuario, contexto)
-        st.markdown("### 🧾 Resposta da IA:")
+
+        # Mostrar pergunta como uma "mensagem"
         st.markdown(f"""
-        <div style="background-color: #e8f0fe; padding: 1rem; border-radius: 10px; border-left: 5px solid #3b82f6;">
-        {resposta}
+        <div class="message user-message">
+            <strong>Você perguntou:</strong><br>{pergunta_usuario}
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Mostrar resposta como "mensagem da IA"
+        st.markdown(f"""
+        <div class="message ai-message">
+            <strong>Resposta da IA:</strong><br>{resposta}
         </div>
         """, unsafe_allow_html=True)
 

@@ -13,17 +13,17 @@ client = Groq(api_key=GROQ_API_KEY)
 
 # Dicionário de países por idioma (para mapear automaticamente os números de emergência)
 COUNTRIES_BY_LANGUAGE = {
-    "🇧🇷 Português (Brasil)": "Brasil",
-    "🇵🇹 Português (Portugal)": "Portugal",
-    "🇺🇸 English (United States)": "United States",
-    "🇬🇧 English (United Kingdom)": "United Kingdom",
-    "🇪🇸 Español (España)": "España",
-    "🇫🇷 Français (France)": "France",
-    "🇩🇪 Deutsch (Deutschland)": "Deutschland",
-    "🇮🇹 Italiano (Italia)": "Italia",
-    "🇯🇵 日本語 (Japan)": "日本 (Japan)",
-    "🇦🇺 English (Australia)": "Australia",
-    "🇨🇦 English (Canada)": "Canada"
+    "Português (Brasil)": "Brasil",
+    "Português (Portugal)": "Portugal",
+    "English (United States)": "United States",
+    "English (United Kingdom)": "United Kingdom",
+    "Español (España)": "España",
+    "Français (France)": "France",
+    "Deutsch (Deutschland)": "Deutschland",
+    "Italiano (Italia)": "Italia",
+    "日本語 (Japan)": "日本 (Japan)",
+    "English (Australia)": "Australia",
+    "English (Canada)": "Canada"
 }
 
 # Números de emergência por país (nomes originais nos idiomas locais)

@@ -87,9 +87,36 @@ def main():
     .stTextInput>div>div>input, .stTextArea textarea {
         background-color: #eef2f7;
     }
+    .pergunta-container {
+        position: relative;
+    }
+    .enviar-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        border: none;
+        background-color: #3b82f6;
+        color: white;
+        border-radius: 50%;
+        width: 38px;
+        height: 38px;
+        cursor: pointer;
+        font-size: 20px;
+    }
+    .enviar-btn:hover {
+        background-color: #2563eb;
+    }
+    .centered-title {
+        text-align: center;
+        font-weight: 600;
+        font-size: 22px;
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
     </style>
     """, unsafe_allow_html=True)
-    
+
+    # Logo
     with st.container():
         st.image(LOGO_PATH, use_container_width=True)
 
@@ -105,11 +132,18 @@ def main():
         with st.expander("📄 Visualizar texto clínico extraído"):
             st.text(texto_extraido)
 
-    # Campo para a pergunta médica
-    st.markdown("### 🩺 Digite sua dúvida médica")
-    pergunta_usuario = st.text_area("Qual é sua pergunta?", height=100)
+    # Título centralizado
+    st.markdown('<div class="centered-title">🩺 Digite sua dúvida médica</div>', unsafe_allow_html=True)
 
-    if st.button("Enviar Pergunta"):
+    # Input com botão dentro
+    with st.form("form_pergunta", clear_on_submit=True):
+        st.markdown('<div class="pergunta-container">', unsafe_allow_html=True)
+        pergunta_usuario = st.text_area("", height=100, placeholder="Digite sua pergunta aqui...")
+        st.markdown('<button class="enviar-btn" type="submit">↑</button>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+        submitted = st.form_submit_button("Enviar", type="primary")
+
+    if submitted and pergunta_usuario.strip():
         contexto = st.session_state.get("texto_clinico", None)
         resposta = diagnosticar_com_groq(pergunta_usuario, contexto)
         st.markdown("### 🧾 Resposta da IA:")

@@ -114,7 +114,7 @@ EMERGENCY_NUMBERS = {
         "Emergência": "112",
         "Toxicologia": "915 620 420"
     },
-    "Reino Unido": {
+    "United Kingdom": {
         "Emergência": "999",
         "NHS Direct": "111",
         "Poison Information": "0344 892 0111"

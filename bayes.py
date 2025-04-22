@@ -89,11 +89,9 @@ def main():
     }
     </style>
     """, unsafe_allow_html=True)
-
-    # Logo e título
+    
     with st.container():
         st.image(LOGO_PATH, use_container_width=True)
-        st.markdown("Obtenha pareceres médicos preliminares com base em sintomas ou exames clínicos.")
 
     # Upload na barra lateral
     with st.sidebar:

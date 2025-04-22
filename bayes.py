@@ -279,11 +279,11 @@ def main():
 
     st.markdown("Faça perguntas médicas para obter informações. Você pode carregar relatórios médicos ou exames em PDF para um diagnóstico mais preciso.")
 
-    # with st.sidebar:
-    st.header("📄 Upload de Arquivos (Opcional)")
-    uploaded_pdfs = st.file_uploader("Adicione seus PDFs clínicos", type="pdf", accept_multiple_files=True)
-    
-    mostrar_numeros_emergencia()
+    with st.sidebar:
+        st.header("📄 Upload de Arquivos (Opcional)")
+        uploaded_pdfs = st.file_uploader("Adicione seus PDFs clínicos", type="pdf", accept_multiple_files=True)
+        
+        mostrar_numeros_emergencia()
 
     if uploaded_pdfs:
         texto_extraido = extract_text_from_pdfs(uploaded_pdfs)

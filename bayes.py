@@ -78,8 +78,7 @@ def main():
 
     st.markdown("Faça perguntas médicas para obter informações. Você pode carregar relatórios médicos ou exames em PDF para um diagnóstico mais preciso.")
 
-    with st.sidebar:
-        st.header("📄 Upload de Arquivos (Opcional)")
+    with st.expander("📄 Upload de Arquivos (Opcional)"):
         uploaded_pdfs = st.file_uploader("Adicione seus PDFs clínicos", type="pdf", accept_multiple_files=True)
 
     if uploaded_pdfs:

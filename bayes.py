@@ -327,9 +327,10 @@ def main():
     )
     
     # Imagem da logo (com largura responsiva)
-    st.image(LOGO_PATH, use_container_width=True)
+    st.image(LOGO_PATH, use_column_width=True)
 
-    st.markdown(f"**{INTERFACE_TEXTS[lang]['header']}**")
+    # Container para o conteúdo principal (acima do input)
+    main_container = st.container()
 
     with st.sidebar:
         st.header(INTERFACE_TEXTS[lang]["sidebar_title"])
@@ -341,18 +342,32 @@ def main():
         
         mostrar_numeros_emergencia(lang)
 
+    # Processar PDFs primeiro
     if uploaded_pdfs:
         texto_extraido = extract_text_from_pdfs(uploaded_pdfs, lang)
         st.session_state["texto_clinico"] = texto_extraido
 
-    pergunta_usuario = st.text_input(INTERFACE_TEXTS[lang]["question_placeholder"])
+    # Container para o input e resposta na parte inferior
+    input_container = st.container()
 
-    if pergunta_usuario:
-        contexto = st.session_state.get("texto_clinico", None)
-        resposta = diagnosticar_com_groq(pergunta_usuario, contexto, lang)
+    with input_container:
+        # Adicionar espaço antes do input
+        st.write("")  # Espaço vazio
+        st.write("")  # Mais espaço
         
-        st.markdown(f"### {INTERFACE_TEXTS[lang]['response_title']}")
-        st.markdown(resposta)
+        pergunta_usuario = st.text_input(INTERFACE_TEXTS[lang]["question_placeholder"])
+        
+        if pergunta_usuario:
+            contexto = st.session_state.get("texto_clinico", None)
+            resposta = diagnosticar_com_groq(pergunta_usuario, contexto, lang)
+            
+            st.markdown(f"### {INTERFACE_TEXTS[lang]['response_title']}")
+            st.markdown(resposta)
+
+    # Conteúdo principal (que ficará acima do input)
+    with main_container:
+        st.markdown(f"**{INTERFACE_TEXTS[lang]['header']}**")
+        # Aqui você pode adicionar outros elementos que devem aparecer acima do input
 
 if __name__ == "__main__":
     main()

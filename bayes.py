@@ -92,41 +92,72 @@ def mostrar_numeros_emergencia():
 
 # Função para criar mapa de hospitais próximos
 def criar_mapa_hospitais(localizacao_usuario):
+    if not GEOPY_AVAILABLE:
+        st.warning("A funcionalidade de mapa requer a instalação do geopy.")
+        return None
+    
     try:
-        geolocator = Nominatim(user_agent="diagnostic_ai")
-        location = geolocator.geocode(localizacao_usuario)
+        # Configuração com timeout maior
+        geolocator = Nominatim(
+            user_agent="diagnostic_ai_app",
+            timeout=10  # Aumenta para 10 segundos
+        )
         
-        if location:
-            mapa = folium.Map(location=[location.latitude, location.longitude], zoom_start=13)
-            
-            # Adicionar marcador do usuário
-            folium.Marker(
-                [location.latitude, location.longitude],
-                popup="Sua localização",
-                icon=folium.Icon(color="blue")
-            ).add_to(mapa)
-            
-            # Buscar hospitais próximos (usando Nominatim - para produção, considere API especializada)
-            hospitais = geolocator.geocode("hospital", exactly_one=False, limit=5, 
-                                          viewbox=[[location.latitude-0.1, location.longitude-0.1], 
-                                                  [location.latitude+0.1, location.longitude+0.1]])
+        # Primeiro tenta geocodificar a localização
+        try:
+            location = geolocator.geocode(localizacao_usuario, exactly_one=True)
+            if not location:
+                st.warning("Localização não encontrada. Tente um endereço mais específico.")
+                return None
+        except Exception as geocode_error:
+            st.error(f"Erro ao buscar localização: {str(geocode_error)}")
+            return None
+
+        # Cria o mapa base
+        mapa = folium.Map(
+            location=[location.latitude, location.longitude],
+            zoom_start=14,
+            tiles='CartoDB positron'  # Tile mais leve
+        )
+
+        # Adiciona marcador do usuário
+        folium.Marker(
+            [location.latitude, location.longitude],
+            popup=f"Sua localização: {localizacao_usuario}",
+            icon=folium.Icon(color='blue')
+        ).add_to(mapa)
+
+        # Tenta buscar hospitais (com tratamento de erro separado)
+        try:
+            hospitais = geolocator.geocode(
+                "hospital",
+                exactly_one=False,
+                limit=5,
+                viewbox=[
+                    [location.latitude-0.05, location.longitude-0.05],
+                    [location.latitude+0.05, location.longitude+0.05]
+                ]
+            )
             
             if hospitais:
                 for hospital in hospitais:
                     folium.Marker(
                         [hospital.latitude, hospital.longitude],
                         popup=hospital.address,
-                        icon=folium.Icon(color="red", icon="plus-sign")
+                        icon=folium.Icon(color='red', icon='medkit')
                     ).add_to(mapa)
-            
-            return mapa
-        else:
-            st.warning("Não foi possível determinar sua localização. Verifique o endereço.")
-            return None
-    except Exception as e:
-        st.error(f"Erro ao criar mapa: {e}")
-        return None
+            else:
+                st.info("Não foram encontrados hospitais próximos no OpenStreetMap.")
 
+        except Exception as hospital_error:
+            st.warning(f"Não foi possível buscar hospitais: {str(hospital_error)}")
+
+        return mapa
+
+    except Exception as e:
+        st.error(f"Erro inesperado ao criar mapa: {str(e)}")
+        return None
+    
 # Função para adicionar tooltips com glossário
 def adicionar_glossario(texto):
     for termo, definicao in GLOSSARIO.items():

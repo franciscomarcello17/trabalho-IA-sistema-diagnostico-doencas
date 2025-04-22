@@ -2,9 +2,8 @@ import streamlit as st
 import fitz  # PyMuPDF
 from groq import Groq
 import os
-import json
-from datetime import datetime, time
-import pandas as pd
+import requests
+from geopy.geocoders import Nominatim
 import folium
 from streamlit_folium import folium_static
 
@@ -16,23 +15,41 @@ LOGO_PATH = os.path.join(CURRENT_DIR, "logo.png")
 GROQ_API_KEY = "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"
 client = Groq(api_key=GROQ_API_KEY)
 
-# Carregar dados de hospitais (simulados - em produção seria uma API ou banco de dados)
-def carregar_hospitais():
-    return [
-        {"nome": "Hospital Geral", "lat": -23.5505, "lon": -46.6333, "tipo": "Geral", "telefone": "(11) 1234-5678"},
-        {"nome": "Pronto Socorro Central", "lat": -23.5515, "lon": -46.6343, "tipo": "Emergência", "telefone": "(11) 9876-5432"},
-        {"nome": "Hospital Infantil", "lat": -23.5525, "lon": -46.6353, "tipo": "Infantil", "telefone": "(11) 4567-8901"},
-    ]
-
 # Glossário médico
 GLOSSARIO = {
     "hipertensão": "Pressão arterial elevada, geralmente acima de 140/90 mmHg.",
     "diabetes": "Doença metabólica caracterizada por altos níveis de glicose no sangue.",
     "ECG": "Eletrocardiograma - exame que registra a atividade elétrica do coração.",
     "hemoglobina": "Proteína nas células vermelhas do sangue que transporta oxigênio.",
-    "PCR": "Proteína C-reativa - marcador de inflamação no organismo.",
-    "TGO/TGP": "Enzimas hepáticas que ajudam a avaliar a saúde do fígado.",
-    "HDL/LDL": "Tipos de colesterol - HDL é 'bom' colesterol, LDL é 'ruim'.",
+    "leucócitos": "Células brancas do sangue, parte do sistema imunológico.",
+    "plaquetas": "Fragmentos celulares que ajudam na coagulação do sangue.",
+    "PCR": "Proteína C-Reativa - marcador de inflamação no organismo.",
+    "TSH": "Hormônio estimulante da tireoide - regula a função tireoidiana.",
+    "AST/ALT": "Enzimas hepáticas - níveis elevados podem indicar dano ao fígado.",
+    "creatinina": "Substância no sangue que ajuda a avaliar a função renal.",
+    "saturação O2": "Porcentagem de hemoglobina carregando oxigênio no sangue.",
+    "PA": "Pressão arterial - medida da força do sangue contra as paredes das artérias.",
+    "FR": "Frequência respiratória - número de respirações por minuto.",
+    "FC": "Frequência cardíaca - número de batimentos cardíacos por minuto.",
+    "TGO/TGP": "Antigos nomes para AST e ALT, respectivamente.",
+    "INR": "Razão Normalizada Internacional - mede o tempo de coagulação do sangue.",
+    "SpO2": "Saturação periférica de oxigênio - medida por oxímetro de pulso.",
+    "Rx": "Raio-X - exame de imagem que usa radiação para visualizar estruturas internas.",
+    "TC": "Tomografia computadorizada - exame de imagem mais detalhado que raio-X.",
+    "RM": "Ressonância magnética - exame de imagem que usa campos magnéticos."
+}
+
+# Números de emergência por país
+EMERGENCY_NUMBERS = {
+    "Brasil": {"SAMU": "192", "Bombeiros": "193", "Polícia": "190"},
+    "Portugal": {"Emergência": "112"},
+    "EUA": {"Emergência": "911"},
+    "Espanha": {"Emergência": "112"},
+    "Reino Unido": {"Emergência": "999"},
+    "Alemanha": {"Emergência": "112"},
+    "França": {"Emergência": "112"},
+    "Itália": {"Emergência": "112"},
+    "Outro": {"Consulte": "o serviço de emergência local"}
 }
 
 # Função para extrair texto de PDFs
@@ -48,24 +65,73 @@ def extract_text_from_pdfs(uploaded_pdfs):
             st.error(f"❌ Erro ao ler o PDF '{pdf.name}': {e}")
     return text
 
-# Função para classificar urgência
-def classificar_urgencia(resposta):
-    termos_vermelho = ["emergência", "imediatamente", "urgente", "grave", "pronto-socorro", "risco de vida"]
-    termos_amarelo = ["avaliar", "breve", "logo", "dentro de dias", "atenção", "cuidado"]
+# Função para determinar a cor da triagem
+def determinar_triagem(resposta):
+    termos_vermelho = ["emergência", "urgente", "imediatamente", "grave", "risco de vida", 
+                      "SAMU", "192", "911", "112", "pronto-socorro", "dor no peito", 
+                      "dificuldade respiratória", "sangramento intenso", "perda de consciência",
+                      "AVC", "acidente vascular cerebral", "infarto", "convulsão"]
     
-    if any(termo in resposta.lower() for termo in termos_vermelho):
-        return "🔴 Vermelho (Emergência - buscar atendimento imediato)"
-    elif any(termo in resposta.lower() for termo in termos_amarelo):
-        return "🟡 Amarelo (Urgente - buscar atendimento em breve)"
+    termos_amarelo = ["avaliar", "recomendo consulta", "médico", "exames", "investigar",
+                     "possível", "suspeita", "recomendável", "urgência relativa", "monitorar"]
+    
+    if any(termo.lower() in resposta.lower() for termo in termos_vermelho):
+        return "vermelho"
+    elif any(termo.lower() in resposta.lower() for termo in termos_amarelo):
+        return "amarelo"
     else:
-        return "🟢 Verde (Rotina - agendar consulta)"
+        return "verde"
+
+# Função para mostrar números de emergência
+def mostrar_numeros_emergencia():
+    st.sidebar.markdown("### 📞 Números de Emergência")
+    pais_selecionado = st.sidebar.selectbox("Selecione seu país:", list(EMERGENCY_NUMBERS.keys()))
+    
+    for servico, numero in EMERGENCY_NUMBERS[pais_selecionado].items():
+        st.sidebar.markdown(f"**{servico}:** `{numero}`")
+
+# Função para criar mapa de hospitais próximos
+def criar_mapa_hospitais(localizacao_usuario):
+    try:
+        geolocator = Nominatim(user_agent="diagnostic_ai")
+        location = geolocator.geocode(localizacao_usuario)
+        
+        if location:
+            mapa = folium.Map(location=[location.latitude, location.longitude], zoom_start=13)
+            
+            # Adicionar marcador do usuário
+            folium.Marker(
+                [location.latitude, location.longitude],
+                popup="Sua localização",
+                icon=folium.Icon(color="blue")
+            ).add_to(mapa)
+            
+            # Buscar hospitais próximos (usando Nominatim - para produção, considere API especializada)
+            hospitais = geolocator.geocode("hospital", exactly_one=False, limit=5, 
+                                          viewbox=[[location.latitude-0.1, location.longitude-0.1], 
+                                                  [location.latitude+0.1, location.longitude+0.1]])
+            
+            if hospitais:
+                for hospital in hospitais:
+                    folium.Marker(
+                        [hospital.latitude, hospital.longitude],
+                        popup=hospital.address,
+                        icon=folium.Icon(color="red", icon="plus-sign")
+                    ).add_to(mapa)
+            
+            return mapa
+        else:
+            st.warning("Não foi possível determinar sua localização. Verifique o endereço.")
+            return None
+    except Exception as e:
+        st.error(f"Erro ao criar mapa: {e}")
+        return None
 
 # Função para adicionar tooltips com glossário
 def adicionar_glossario(texto):
-    for termo, explicacao in GLOSSARIO.items():
+    for termo, definicao in GLOSSARIO.items():
         if termo.lower() in texto.lower():
-            texto = texto.replace(termo, f'<span title="{explicacao}">{termo}</span>')
-            texto = texto.replace(termo.capitalize(), f'<span title="{explicacao}">{termo.capitalize()}</span>')
+            texto = texto.replace(termo, f'<span title="{definicao}">{termo}</span>')
     return texto
 
 # Função para interagir com a IA da Groq para diagnósticos
@@ -113,229 +179,94 @@ def main():
     st.set_page_config(
         page_title="DiagnosticAI",
         page_icon="⚕️",
-        layout="wide"
+        layout="centered"
     )
-    
-    # CSS personalizado
-    st.markdown("""
-    <style>
-        .urg-red {
-            background-color: #ffcccc;
-            padding: 10px;
-            border-radius: 5px;
-            border-left: 5px solid #ff0000;
-        }
-        .urg-yellow {
-            background-color: #ffffcc;
-            padding: 10px;
-            border-radius: 5px;
-            border-left: 5px solid #ffcc00;
-        }
-        .urg-green {
-            background-color: #ccffcc;
-            padding: 10px;
-            border-radius: 5px;
-            border-left: 5px solid #00cc00;
-        }
-        .tooltip {
-            border-bottom: 1px dotted #000;
-            cursor: help;
-        }
-    </style>
-    """, unsafe_allow_html=True)
     
     # Imagem da logo (com largura responsiva)
     st.image(LOGO_PATH, use_column_width=True)
 
     st.markdown("""
-    <div style="text-align: center;">
-        <h1>DiagnosticAI</h1>
-        <p>Faça perguntas médicas para obter informações. Você pode carregar relatórios médicos ou exames em PDF para um diagnóstico mais preciso.</p>
-    </div>
+    <style>
+    .tooltip {
+        position: relative;
+        display: inline-block;
+        border-bottom: 1px dotted black;
+    }
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 200px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
+    </style>
     """, unsafe_allow_html=True)
 
-    # Sidebar com múltiplas funcionalidades
+    st.markdown("Faça perguntas médicas para obter informações. Você pode carregar relatórios médicos ou exames em PDF para um diagnóstico mais preciso.")
+
     with st.sidebar:
-        st.header("⚙️ Menu")
+        st.header("📄 Upload de Arquivos (Opcional)")
+        uploaded_pdfs = st.file_uploader("Adicione seus PDFs clínicos", type="pdf", accept_multiple_files=True)
         
-        tab1, tab2, tab3 = st.tabs(["📄 Documentos", "💊 Medicamentos", "🏥 Hospitais"])
+        mostrar_numeros_emergencia()
         
-        with tab1:
-            uploaded_pdfs = st.file_uploader("Adicione seus PDFs clínicos", type="pdf", accept_multiple_files=True)
-            
-        with tab2:
-            st.subheader("Lembretes de Medicamentos")
-            
-            if 'medicamentos' not in st.session_state:
-                st.session_state.medicamentos = []
-            
-            with st.form("med_form"):
-                nome_med = st.text_input("Nome do Medicamento")
-                dosagem = st.text_input("Dosagem")
-                horarios = st.multiselect("Horários", ["Manhã", "Tarde", "Noite"])
-                frequencia = st.selectbox("Frequência", ["Diário", "Semanal", "Mensal"])
-                submit_med = st.form_submit_button("Adicionar")
-                
-                if submit_med and nome_med:
-                    novo_med = {
-                        "nome": nome_med,
-                        "dosagem": dosagem,
-                        "horarios": horarios,
-                        "frequencia": frequencia,
-                        "adicionado_em": datetime.now().strftime("%d/%m/%Y %H:%M")
-                    }
-                    st.session_state.medicamentos.append(novo_med)
-                    st.success("Medicamento adicionado!")
-            
-            if st.session_state.medicamentos:
-                st.subheader("Seus Medicamentos")
-                for i, med in enumerate(st.session_state.medicamentos):
-                    with st.expander(f"{med['nome']} - {med['dosagem']}"):
-                        st.write(f"**Horários:** {', '.join(med['horarios'])}")
-                        st.write(f"**Frequência:** {med['frequencia']}")
-                        st.write(f"**Adicionado em:** {med['adicionado_em']}")
-                        if st.button(f"Remover {i}"):
-                            st.session_state.medicamentos.pop(i)
-                            st.rerun()
-        
-        with tab3:
-            st.subheader("Hospitais Próximos")
-            hospitais = carregar_hospitais()
-            
-            mapa = folium.Map(location=[-23.5505, -46.6333], zoom_start=13)
-            
-            for hospital in hospitais:
-                folium.Marker(
-                    [hospital["lat"], hospital["lon"]],
-                    popup=f"<b>{hospital['nome']}</b><br>Tipo: {hospital['tipo']}<br>Tel: {hospital['telefone']}",
-                    tooltip=hospital["nome"],
-                    icon=folium.Icon(color="red" if hospital["tipo"] == "Emergência" else "blue")
-                ).add_to(mapa)
-            
-            folium_static(mapa, width=300)
-            
-            st.write("**Lista de Hospitais:**")
-            for hospital in hospitais:
-                st.write(f"- {hospital['nome']} ({hospital['tipo']}) - Tel: {hospital['telefone']}")
+        st.header("🏥 Localização para Hospitais")
+        localizacao_usuario = st.text_input("Digite seu endereço ou cidade para encontrar hospitais próximos:")
+        if localizacao_usuario:
+            mapa = criar_mapa_hospitais(localizacao_usuario)
+            if mapa:
+                folium_static(mapa)
 
-    # Área principal
-    col1, col2 = st.columns([3, 1])
-    
-    with col1:
-        if uploaded_pdfs:
-            texto_extraido = extract_text_from_pdfs(uploaded_pdfs)
-            st.session_state["texto_clinico"] = texto_extraido
+    if uploaded_pdfs:
+        texto_extraido = extract_text_from_pdfs(uploaded_pdfs)
+        st.session_state["texto_clinico"] = texto_extraido
 
-        pergunta_usuario = st.text_area("🩺 Descreva seus sintomas ou faça sua pergunta médica:", height=150)
+    pergunta_usuario = st.text_input("🩺 Qual é a sua dúvida médica?")
 
-        if st.button("Obter Diagnóstico Preliminar"):
-            if pergunta_usuario:
-                contexto = st.session_state.get("texto_clinico", None)
-                resposta = diagnosticar_com_groq(pergunta_usuario, contexto)
-                
-                # Classificar urgência
-                urgencia = classificar_urgencia(resposta)
-                
-                # Adicionar glossário
-                resposta_com_glossario = adicionar_glossario(resposta)
-                
-                # Exibir resultados
-                st.markdown("### 🧾 Resposta da IA")
-                
-                # Container de urgência
-                if "🔴 Vermelho" in urgencia:
-                    st.markdown(f'<div class="urg-red"><h4>{urgencia}</h4></div>', unsafe_allow_html=True)
-                elif "🟡 Amarelo" in urgencia:
-                    st.markdown(f'<div class="urg-yellow"><h4>{urgencia}</h4></div>', unsafe_allow_html=True)
-                else:
-                    st.markdown(f'<div class="urg-green"><h4>{urgencia}</h4></div>', unsafe_allow_html=True)
-                
-                # Resposta com tooltips
-                st.markdown(resposta_com_glossario, unsafe_allow_html=True)
-                
-                # Botões de ação
-                st.markdown("### 📌 Ações Recomendadas")
-                col_btn1, col_btn2, col_btn3 = st.columns(3)
-                
-                with col_btn1:
-                    if st.button("📞 Chamar Emergência (192)"):
-                        st.warning("Ligue para 192 (SAMU) ou 193 (Bombeiros) em caso de emergência!")
-                
-                with col_btn2:
-                    if st.button("🏥 Mostrar Hospitais Próximos"):
-                        hospitais = carregar_hospitais()
-                        mapa = folium.Map(location=[-23.5505, -46.6333], zoom_start=13)
-                        
-                        for hospital in hospitais:
-                            folium.Marker(
-                                [hospital["lat"], hospital["lon"]],
-                                popup=f"<b>{hospital['nome']}</b><br>Tipo: {hospital['tipo']}<br>Tel: {hospital['telefone']}",
-                                tooltip=hospital["nome"],
-                                icon=folium.Icon(color="red" if hospital["tipo"] == "Emergência" else "blue")
-                            ).add_to(mapa)
-                        
-                        folium_static(mapa, width=700)
-                
-                with col_btn3:
-                    if st.button("💊 Adicionar Lembrete de Medicamento"):
-                        st.session_state.show_med_form = True
-                
-                if st.session_state.get("show_med_form", False):
-                    with st.form("quick_med_form"):
-                        nome_med = st.text_input("Nome do Medicamento")
-                        dosagem = st.text_input("Dosagem")
-                        submit_med = st.form_submit_button("Salvar")
-                        
-                        if submit_med and nome_med:
-                            novo_med = {
-                                "nome": nome_med,
-                                "dosagem": dosagem,
-                                "horarios": ["Manhã", "Tarde", "Noite"],
-                                "frequencia": "Diário",
-                                "adicionado_em": datetime.now().strftime("%d/%m/%Y %H:%M")
-                            }
-                            if 'medicamentos' not in st.session_state:
-                                st.session_state.medicamentos = []
-                            st.session_state.medicamentos.append(novo_med)
-                            st.success("Medicamento adicionado aos lembretes!")
-                            st.session_state.show_med_form = False
-                            st.rerun()
-            else:
-                st.warning("Por favor, descreva seus sintomas ou faça uma pergunta.")
-
-    with col2:
-        st.markdown("### 📌 Painel Rápido")
+    if pergunta_usuario:
+        contexto = st.session_state.get("texto_clinico", None)
+        resposta = diagnosticar_com_groq(pergunta_usuario, contexto)
         
-        st.markdown("#### 🚨 Contatos de Emergência")
-        st.write("- SAMU: 192")
-        st.write("- Bombeiros: 193")
-        st.write("- Polícia: 190")
-        st.write("- Centro de Toxicologia: 0800-722-6001")
+        # Determinar nível de urgência
+        nivel_triagem = determinar_triagem(resposta)
         
-        st.markdown("#### 📅 Próximos Lembretes")
-        if 'medicamentos' in st.session_state and st.session_state.medicamentos:
-            agora = datetime.now().time()
-            proximos = []
-            
-            for med in st.session_state.medicamentos:
-                if "Manhã" in med["horarios"] and time(6,0) <= agora < time(12,0):
-                    proximos.append(f"{med['nome']} - Manhã")
-                if "Tarde" in med["horarios"] and time(12,0) <= agora < time(18,0):
-                    proximos.append(f"{med['nome']} - Tarde")
-                if "Noite" in med["horarios"] and (time(18,0) <= agora or agora < time(6,0)):
-                    proximos.append(f"{med['nome']} - Noite")
-            
-            if proximos:
-                for item in proximos:
-                    st.write(f"- {item}")
-            else:
-                st.write("Nenhum lembrete para este período.")
+        # Mostrar resposta com formatação de cores
+        st.markdown("### � Triagem de Urgência")
+        if nivel_triagem == "vermelho":
+            st.error("🔴 Nível VERMELHO - Procure atendimento médico IMEDIATAMENTE!")
+        elif nivel_triagem == "amarelo":
+            st.warning("🟡 Nível AMARELO - Recomendada avaliação médica em breve")
         else:
-            st.write("Nenhum medicamento cadastrado.")
+            st.success("🟢 Nível VERDE - Sem urgência aparente")
         
-        st.markdown("#### 📚 Glossário Médico")
-        termo_selecionado = st.selectbox("Buscar termo médico", list(GLOSSARIO.keys()))
-        st.write(GLOSSARIO[termo_selecionado])
+        st.markdown("### � Resposta da IA:")
+        
+        # Adicionar tooltips do glossário
+        resposta_com_glossario = adicionar_glossario(resposta)
+        st.markdown(resposta_com_glossario, unsafe_allow_html=True)
+        
+        # Mostrar mapa novamente se for caso de emergência
+        if nivel_triagem in ["vermelho", "amarelo"]:
+            st.markdown("### 🏥 Hospitais Próximos")
+            if 'localizacao_usuario' in locals() and localizacao_usuario:
+                mapa = criar_mapa_hospitais(localizacao_usuario)
+                if mapa:
+                    folium_static(mapa)
+            else:
+                st.warning("Digite sua localização na barra lateral para visualizar hospitais próximos.")
 
 if __name__ == "__main__":
     main()

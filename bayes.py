@@ -327,7 +327,7 @@ def main():
     )
     
     # Imagem da logo (com largura responsiva)
-    st.image(LOGO_PATH, use_column_width=True)
+    st.image(LOGO_PATH, use_container_width=True)
 
     # Container para o conteúdo principal (acima do input)
     main_container = st.container()

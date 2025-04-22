@@ -91,63 +91,63 @@ GLOSSARIO = {
     "HAS": "Hipertensão Arterial Sistêmica."
 }
 
-# Números de emergência por país
+# Números de emergência por país (nomes originais nos idiomas locais)
 EMERGENCY_NUMBERS = {
-    "Brasil": {
+    "Brasil": {  # Português
         "SAMU": "192",
         "Bombeiros": "193", 
         "Polícia Militar": "190",
         "Disque Intoxicação": "0800-722-6001",
-        "Centro de Valorização da Vida (CVV)": "188"
+        "CVV (Centro de Valorização da Vida)": "188"
     },
-    "Portugal": {
-        "Emergência": "112",
+    "Portugal": {  # Português
+        "Número de Emergência": "112",
         "Saúde 24": "808 24 24 24",
-        "Intoxicações": "808 250 143"
+        "Centro de Informação Antivenenos": "808 250 143"
     },
-    "EUA": {
-        "Emergência": "911",
+    "United States": {  # Inglês
+        "Emergency": "911",
         "Poison Control": "1-800-222-1222",
-        "Suicide Prevention": "988"
+        "Suicide & Crisis Lifeline": "988"
     },
-    "Espanha": {
-        "Emergência": "112",
-        "Toxicologia": "915 620 420"
+    "España": {  # Espanhol
+        "Emergencias": "112",
+        "Instituto Nacional de Toxicología": "915 620 420"
     },
-    "United Kingdom": {
-        "Emergência": "999",
-        "NHS Direct": "111",
-        "Poison Information": "0344 892 0111"
+    "United Kingdom": {  # Inglês
+        "Emergency": "999",
+        "NHS Non-emergency": "111",
+        "National Poisons Information Service": "0344 892 0111"
     },
-    "Alemanha": {
-        "Emergência": "112",
-        "Intoxicações": "030-19240"
+    "Deutschland": {  # Alemão
+        "Notruf": "112",
+        "Giftnotruf": "030-19240"
     },
-    "França": {
-        "Emergência": "112",
-        "SAMU": "15",
-        "Centre Anti-Poison": "01 40 05 48 48"
+    "France": {  # Francês
+        "Urgences": "112",
+        "SAMU (Service d'Aide Médicale Urgente)": "15",
+        "Centre Antipoison": "01 40 05 48 48"
     },
-    "Itália": {
-        "Emergência": "112",
-        "Emergência Médica": "118",
+    "Italia": {  # Italiano
+        "Emergenza": "112",
+        "Emergenza Sanitaria": "118",
         "Centro Antiveleni": "06 4997 7700"
     },
-    "Japão": {
-        "Emergência": "119",
-        "Polícia": "110"
+    "日本 (Japan)": {  # Japonês
+        "救急 (Kyūkyū)": "119",
+        "警察 (Keisatsu)": "110"
     },
-    "Austrália": {
-        "Emergência": "000",
+    "Australia": {  # Inglês
+        "Emergency": "000",
         "Poisons Information": "13 11 26"
     },
-    "Canadá": {
-        "Emergência": "911",
+    "Canada": {  # Inglês/Francês
+        "Emergency": "911",
         "Poison Control": "1-800-268-9017"
     },
-    "Outro": {
-        "Consulte": "o serviço de emergência local",
-        "Emergência Internacional": "112 (funciona em muitos países)"
+    "Other": {
+        "Local emergency service": "Check local number",
+        "International emergency": "112 (works in many countries)"
     }
 }
 
@@ -163,23 +163,6 @@ def extract_text_from_pdfs(uploaded_pdfs):
         except Exception as e:
             st.error(f"❌ Erro ao ler o PDF '{pdf.name}': {e}")
     return text
-
-# Função para determinar a cor da triagem
-def determinar_triagem(resposta):
-    termos_vermelho = ["emergência", "urgente", "imediatamente", "grave", "risco de vida", 
-                      "SAMU", "192", "911", "112", "pronto-socorro", "dor no peito", 
-                      "dificuldade respiratória", "sangramento intenso", "perda de consciência",
-                      "AVC", "acidente vascular cerebral", "infarto", "convulsão"]
-    
-    termos_amarelo = ["avaliar", "recomendo consulta", "médico", "exames", "investigar",
-                     "possível", "suspeita", "recomendável", "urgência relativa", "monitorar"]
-    
-    if any(termo.lower() in resposta.lower() for termo in termos_vermelho):
-        return "vermelho"
-    elif any(termo.lower() in resposta.lower() for termo in termos_amarelo):
-        return "amarelo"
-    else:
-        return "verde"
 
 # Função para mostrar números de emergência
 def mostrar_numeros_emergencia():
@@ -294,18 +277,6 @@ def main():
     if pergunta_usuario:
         contexto = st.session_state.get("texto_clinico", None)
         resposta = diagnosticar_com_groq(pergunta_usuario, contexto)
-        
-        # Determinar nível de urgência
-        nivel_triagem = determinar_triagem(resposta)
-        
-        # Mostrar resposta com formatação de cores
-        st.markdown("### ⚠️ Triagem de Urgência")
-        if nivel_triagem == "vermelho":
-            st.error("🔴 Nível VERMELHO - Procure atendimento médico IMEDIATAMENTE!")
-        elif nivel_triagem == "amarelo":
-            st.warning("🟡 Nível AMARELO - Recomendada avaliação médica em breve")
-        else:
-            st.success("🟢 Nível VERDE - Sem urgência aparente")
         
         st.markdown("### 💡 Resposta da IA:")
         

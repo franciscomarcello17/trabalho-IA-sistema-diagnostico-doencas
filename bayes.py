@@ -24,12 +24,32 @@ def extract_text_from_pdfs(uploaded_pdfs):
             st.error(f"❌ Erro ao ler o PDF '{pdf.name}': {e}")
     return text
 
-# Função para interagir com a IA da Groq
+
+# Função para interagir com a IA da Groq para diagnósticos
 def diagnosticar_com_groq(pergunta, contexto=None):
     messages = [
         {
-            "role": "system",
-            "content": """Você é uma inteligência artificial médica especializada..."""  # (mantido como antes)
+            "role": "system", 
+            "content": """Você é uma inteligência artificial médica especializada em análise preliminar de condições de saúde. 
+            Suas responsabilidades incluem:
+            
+            1. Analisar sintomas descritos pelo usuário com precisão e cuidado
+            2. Interpretar relatórios clínicos e resultados de exames quando fornecidos
+            3. Oferecer informações médicas baseadas em evidências científicas
+            4. Sugerir possíveis condições relacionadas (como diagnóstico diferencial)
+            5. Recomendar quando procurar atendimento médico
+            6. Fornecer contatos de emergência quando necessário
+            
+            Restrições obrigatórias:
+            - NUNCA afirme que seu diagnóstico é definitivo
+            - Em casos potencialmente graves (como dor no peito, dificuldade respiratória, sangramentos intensos):
+              * Recomende busca imediata de atendimento médico
+              * Forneça números de telefone de emergência locais
+              * Descreva sinais de alarme para observar
+            - Para questões não médicas, responda apenas: "Desculpe, só posso ajudar com questões médicas"
+            - Caso o arquivo não tenha relacão com medicina, avise o usuário e não processe o arquivo
+            - Em questões médicas, inclua a frase: "Este é apenas um parecer preliminar - o diagnóstico definitivo requer avaliação médica profissional." como um paragrafo final
+            - Mantenha tom profissional, empático e sem alarmismo desnecessário"""
         },
     ]
     
@@ -44,70 +64,31 @@ def diagnosticar_com_groq(pergunta, contexto=None):
     )
     return response.choices[0].message.content
 
-# Interface principal
+# Interface do Streamlit
 def main():
-    st.set_page_config(page_title="DiagnosticAI", page_icon="⚕️", layout="centered")
-
-    st.markdown("""
-        <style>
-        .chat-input {
-            display: flex;
-            align-items: center;
-            margin-top: 20px;
-        }
-        .chat-input textarea {
-            flex-grow: 1;
-            resize: none;
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            border: 1px solid #ccc;
-            font-size: 1rem;
-            background-color: #f8f9fa;
-        }
-        .chat-buttons {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            margin-left: 10px;
-        }
-        .chat-buttons button, .chat-buttons label {
-            background-color: #1f77b4;
-            color: white;
-            padding: 0.5rem 0.8rem;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            margin-left: 5px;
-        }
-        .file-input {
-            display: none;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-    # Exibe logo
+    # Configuração da página com ícone personalizado
+    st.set_page_config(
+        page_title="DiagnosticAI",
+        page_icon="⚕️",
+        layout="centered"
+    )
+    
+    # Imagem da logo (com largura responsiva)
     st.image(LOGO_PATH, use_container_width=True)
 
-    st.markdown("#### Obtenha pareceres médicos com ajuda da IA")
-    st.markdown("Carregue arquivos clínicos (opcional) e envie sua dúvida.")
+    st.markdown("Faça perguntas médicas para obter informações. Você pode carregar relatórios médicos ou exames em PDF para um diagnóstico mais preciso.")
 
-    if "texto_clinico" not in st.session_state:
-        st.session_state["texto_clinico"] = ""
+    with st.sidebar:
+        st.header("📄 Upload de Arquivos (Opcional)")
+        uploaded_pdfs = st.file_uploader("Adicione seus PDFs clínicos", type="pdf", accept_multiple_files=True)
 
-    # Caixa de entrada personalizada (parecida com ChatGPT)
-    with st.form("form_pergunta", clear_on_submit=True):
-        cols = st.columns([8, 1, 1])
-        pergunta_usuario = cols[0].text_input("Digite sua pergunta médica:", label_visibility="collapsed", placeholder="Descreva seus sintomas ou dúvidas...")
-        enviar = cols[1].form_submit_button("📤")
-        upload = cols[2].file_uploader("📎", type="pdf", label_visibility="collapsed", accept_multiple_files=True)
-
-    # Processar upload
-    if upload:
-        texto_extraido = extract_text_from_pdfs(upload)
+    if uploaded_pdfs:
+        texto_extraido = extract_text_from_pdfs(uploaded_pdfs)
         st.session_state["texto_clinico"] = texto_extraido
 
-    # Processar pergunta
-    if enviar and pergunta_usuario:
+    pergunta_usuario = st.text_input("🩺 Qual é a sua dúvida médica?")
+
+    if pergunta_usuario:
         contexto = st.session_state.get("texto_clinico", None)
         resposta = diagnosticar_com_groq(pergunta_usuario, contexto)
         st.markdown("### 🧾 Resposta da IA:")

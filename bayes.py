@@ -17,41 +17,142 @@ client = Groq(api_key=GROQ_API_KEY)
 
 # Glossário médico
 GLOSSARIO = {
+    # Termos gerais
     "hipertensão": "Pressão arterial elevada, geralmente acima de 140/90 mmHg.",
     "diabetes": "Doença metabólica caracterizada por altos níveis de glicose no sangue.",
+    "hiperglicemia": "Nível elevado de glicose no sangue (>126 mg/dL em jejum).",
+    "hipoglicemia": "Nível baixo de glicose no sangue (<70 mg/dL).",
+    
+    # Exames e procedimentos
     "ECG": "Eletrocardiograma - exame que registra a atividade elétrica do coração.",
-    "hemoglobina": "Proteína nas células vermelhas do sangue que transporta oxigênio.",
-    "leucócitos": "Células brancas do sangue, parte do sistema imunológico.",
-    "plaquetas": "Fragmentos celulares que ajudam na coagulação do sangue.",
-    "PCR": "Proteína C-Reativa - marcador de inflamação no organismo.",
-    "TSH": "Hormônio estimulante da tireoide - regula a função tireoidiana.",
-    "AST/ALT": "Enzimas hepáticas - níveis elevados podem indicar dano ao fígado.",
-    "creatinina": "Substância no sangue que ajuda a avaliar a função renal.",
-    "saturação O2": "Porcentagem de hemoglobina carregando oxigênio no sangue.",
-    "PA": "Pressão arterial - medida da força do sangue contra as paredes das artérias.",
-    "FR": "Frequência respiratória - número de respirações por minuto.",
-    "FC": "Frequência cardíaca - número de batimentos cardíacos por minuto.",
-    "TGO/TGP": "Antigos nomes para AST e ALT, respectivamente.",
-    "INR": "Razão Normalizada Internacional - mede o tempo de coagulação do sangue.",
-    "SpO2": "Saturação periférica de oxigênio - medida por oxímetro de pulso.",
-    "Rx": "Raio-X - exame de imagem que usa radiação para visualizar estruturas internas.",
-    "TC": "Tomografia computadorizada - exame de imagem mais detalhado que raio-X.",
-    "RM": "Ressonância magnética - exame de imagem que usa campos magnéticos."
+    "EEG": "Eletroencefalograma - exame que avalia a atividade elétrica cerebral.",
+    "endoscopia": "Exame que visualiza o trato digestivo alto usando uma câmera.",
+    "colonoscopia": "Exame que visualiza o intestino grosso usando uma câmera.",
+    
+    # Componentes sanguíneos
+    "hemoglobina": "Proteína nas hemácias que transporta oxigênio (valores normais: 13-18 g/dL homens, 12-16 g/dL mulheres).",
+    "leucócitos": "Células brancas do sangue (valores normais: 4.000-11.000/mm³).",
+    "plaquetas": "Fragmentos celulares para coagulação (valores normais: 150.000-450.000/mm³).",
+    "hematócrito": "Porcentagem de células vermelhas no sangue (valores normais: 40-54% homens, 36-48% mulheres).",
+    
+    # Marcadores bioquímicos
+    "PCR": "Proteína C-Reativa - marcador de inflamação (normal <5 mg/L).",
+    "TSH": "Hormônio estimulante da tireoide (normal 0,4-4,5 mUI/L).",
+    "T4 livre": "Tiroxina livre - hormônio tireoidiano (normal 0,8-1,8 ng/dL).",
+    "AST/ALT": "Enzimas hepáticas (normal AST <40 U/L, ALT <56 U/L).",
+    
+    # Função renal
+    "creatinina": "Marcador de função renal (normal 0,6-1,3 mg/dL).",
+    "ureia": "Produto do metabolismo proteico (normal 15-45 mg/dL).",
+    "clearance": "Taxa de filtração glomerular (normal >90 mL/min).",
+    
+    # Cardiovascular
+    "PA": "Pressão arterial (normal <120/80 mmHg).",
+    "FC": "Frequência cardíaca (normal 60-100 bpm em repouso).",
+    "taquicardia": "Frequência cardíaca >100 bpm.",
+    "bradicardia": "Frequência cardíaca <60 bpm.",
+    
+    # Respiratório
+    "FR": "Frequência respiratória (normal 12-20 rpm em adultos).",
+    "saturação O2": "Saturação de oxigênio (normal 95-100%).",
+    "dispneia": "Dificuldade respiratória.",
+    "SpO2": "Saturação periférica de oxigênio medida por oxímetro.",
+    
+    # Imagem
+    "Rx": "Radiografia (raio-X) - exame de imagem por radiação ionizante.",
+    "TC": "Tomografia computadorizada - imagens seccionais por raio-X.",
+    "RM": "Ressonância magnética - imagens por campo magnético e ondas de rádio.",
+    "US": "Ultrassonografia - imagens por ondas ultrassônicas.",
+    
+    # Medicamentos
+    "AAS": "Ácido acetilsalicílico (aspirina) - antiagregante plaquetário.",
+    "IBP": "Inibidor de bomba de prótons (omeprazol, pantoprazol).",
+    "AINE": "Anti-inflamatório não esteroidal (ibuprofeno, diclofenaco).",
+    "betabloqueador": "Classe de medicamentos para hipertensão e arritmias.",
+    
+    # Especialidades
+    "cardiologia": "Especialidade médica que trata do coração e sistema cardiovascular.",
+    "neurologia": "Especialidade que trata do sistema nervoso.",
+    "ortopedia": "Especialidade que trata do sistema musculoesquelético.",
+    "pediatria": "Especialidade médica dedicada a crianças.",
+    
+    # Emergências
+    "AVC": "Acidente Vascular Cerebral - interrupção do fluxo sanguíneo cerebral.",
+    "IAM": "Infarto Agudo do Miocárdio (ataque cardíaco).",
+    "PCR": "Parada Cardiorrespiratória - cessação da função cardíaca e respiratória.",
+    "TEP": "Tromboembolismo Pulmonar - obstrução da artéria pulmonar.",
+    
+    # Sinais e sintomas
+    "cefaleia": "Dor de cabeça.",
+    "mialgia": "Dor muscular.",
+    "artralgia": "Dor articular.",
+    "parestesia": "Formigamento ou dormência.",
+    
+    # Doenças
+    "DPOC": "Doença Pulmonar Obstrutiva Crônica (enfisema e bronquite crônica).",
+    "IR": "Insuficiência Renal - perda da função dos rins.",
+    "ICC": "Insuficiência Cardíaca Congestiva - incapacidade do coração bombear sangue.",
+    "HAS": "Hipertensão Arterial Sistêmica."
 }
-
 # Números de emergência por país
 EMERGENCY_NUMBERS = {
-    "Brasil": {"SAMU": "192", "Bombeiros": "193", "Polícia": "190"},
-    "Portugal": {"Emergência": "112"},
-    "EUA": {"Emergência": "911"},
-    "Espanha": {"Emergência": "112"},
-    "Reino Unido": {"Emergência": "999"},
-    "Alemanha": {"Emergência": "112"},
-    "França": {"Emergência": "112"},
-    "Itália": {"Emergência": "112"},
-    "Outro": {"Consulte": "o serviço de emergência local"}
+    "Brasil": {
+        "SAMU": "192",
+        "Bombeiros": "193", 
+        "Polícia Militar": "190",
+        "Disque Intoxicação": "0800-722-6001",
+        "Centro de Valorização da Vida (CVV)": "188"
+    },
+    "Portugal": {
+        "Emergência": "112",
+        "Saúde 24": "808 24 24 24",
+        "Intoxicações": "808 250 143"
+    },
+    "EUA": {
+        "Emergência": "911",
+        "Poison Control": "1-800-222-1222",
+        "Suicide Prevention": "988"
+    },
+    "Espanha": {
+        "Emergência": "112",
+        "Toxicologia": "915 620 420"
+    },
+    "Reino Unido": {
+        "Emergência": "999",
+        "NHS Direct": "111",
+        "Poison Information": "0344 892 0111"
+    },
+    "Alemanha": {
+        "Emergência": "112",
+        "Intoxicações": "030-19240"
+    },
+    "França": {
+        "Emergência": "112",
+        "SAMU": "15",
+        "Centre Anti-Poison": "01 40 05 48 48"
+    },
+    "Itália": {
+        "Emergência": "112",
+        "Emergência Médica": "118",
+        "Centro Antiveleni": "06 4997 7700"
+    },
+    "Japão": {
+        "Emergência": "119",
+        "Polícia": "110"
+    },
+    "Austrália": {
+        "Emergência": "000",
+        "Poisons Information": "13 11 26"
+    },
+    "Canadá": {
+        "Emergência": "911",
+        "Poison Control": "1-800-268-9017"
+    },
+    "Outro": {
+        "Consulte": "o serviço de emergência local",
+        "Emergência Internacional": "112 (funciona em muitos países)"
+    }
 }
-
 # Função para extrair texto de PDFs
 def extract_text_from_pdfs(uploaded_pdfs):
     text = ""

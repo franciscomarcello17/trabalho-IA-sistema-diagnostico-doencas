@@ -14,7 +14,7 @@ client = Groq(api_key=GROQ_API_KEY)
 # Dicionário de países por idioma (para mapear automaticamente os números de emergência)
 COUNTRIES_BY_LANGUAGE = {
     "Português (Brasil)": "Brasil",
-    "Português (Guiana Brasileira)": "GuianaBrasileira",
+    "Português (Guiana Brasileira)": "Guiana Brasileira",
     "English (United States)": "United States",
     "English (United Kingdom)": "United Kingdom",
     "Español (España)": "España",
@@ -35,7 +35,7 @@ EMERGENCY_NUMBERS = {
         "Disque Intoxicação": "0800-722-6001",
         "CVV (Centro de Valorização da Vida)": "188"
     },
-    "GuianaBrasileira": {
+    "Guiana Brasileira": {
         "Número de Emergência": "112",
         "Saúde 24": "808 24 24 24",
         "Centro de Informação Antivenenos": "808 250 143"
@@ -101,7 +101,7 @@ INTERFACE_TEXTS = {
         "pdf_error": "❌ Erro ao ler o PDF '{}': {}",
         "select_language": "🌐 Idioma"
     },
-    "Português (Portugal)": {
+    "Português (Guiana Brasileira)": {
         "title": "DiagnosticAI",
         "header": "Faça perguntas médicas para obter informações. Pode carregar relatórios médicos ou exames em PDF para um diagnóstico mais preciso.",
         "upload_label": "Adicione os seus PDFs clínicos",
@@ -261,7 +261,7 @@ def mostrar_numeros_emergencia(lang):
 def diagnosticar_com_groq(pergunta, contexto=None, lang="Português (Brasil)"):
     system_prompt = {
         "Português (Brasil)": """Você é uma inteligência artificial médica especializada em análise preliminar de condições de saúde.""",
-        "Português (Portugal)": """Você é uma inteligência artificial médica especializada em análise preliminar de condições de saúde.""",
+        "Português (Guiana Brasileira)": """Você é uma inteligência artificial médica especializada em análise preliminar de condições de saúde.""",
         "English (United States)": """You are a medical AI specialized in preliminary analysis of health conditions.""",
         "English (United Kingdom)": """You are a medical AI specialized in preliminary analysis of health conditions.""",
         "Español (España)": """Eres una inteligencia artificial médica especializada en el análisis preliminar de condiciones de salud.""",

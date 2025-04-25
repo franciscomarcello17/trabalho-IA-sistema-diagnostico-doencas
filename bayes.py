@@ -14,7 +14,7 @@ client = Groq(api_key=GROQ_API_KEY)
 # Dicionário de países por idioma (para mapear automaticamente os números de emergência)
 COUNTRIES_BY_LANGUAGE = {
     "Português (Brasil)": "Brasil",
-    "Português (Portugal)": "Portugal",
+    "Português (Guiana Brasileira)": "GuianaBrasileira",
     "English (United States)": "United States",
     "English (United Kingdom)": "United Kingdom",
     "Español (España)": "España",
@@ -35,7 +35,7 @@ EMERGENCY_NUMBERS = {
         "Disque Intoxicação": "0800-722-6001",
         "CVV (Centro de Valorização da Vida)": "188"
     },
-    "Portugal": {
+    "GuianaBrasileira": {
         "Número de Emergência": "112",
         "Saúde 24": "808 24 24 24",
         "Centro de Informação Antivenenos": "808 250 143"
